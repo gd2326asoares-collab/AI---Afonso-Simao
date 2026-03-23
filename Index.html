@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA & Desporto — Afonso Soares & Simão Calôbra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #080a0f;
+    --surface: #0d1017;
+    --surface2: #141820;
+    --accent: #00e5ff;
+    --accent2: #7b61ff;
+    --accent3: #00ff94;
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+    --border: rgba(255,255,255,0.06);
+    --glow: rgba(0,229,255,0.15);
+    --glow2: rgba(123,97,255,0.15);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  /* ── CURSOR GLOW ── */
+  #cursor-glow {
+    position: fixed; width: 300px; height: 300px;
+    border-radius: 50%; pointer-events: none; z-index: 0;
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+    transform: translate(-50%,-50%);
+    transition: opacity 0.3s;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px;
+    height: 64px;
+    background: rgba(8,10,15,0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-size: 12px; font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .nav-links { display: flex; gap: 0; list-style: none; }
+  .nav-links a {
+    color: var(--text-muted); text-decoration: none;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: 4px; left: 16px; right: 16px;
+    height: 1px; background: var(--accent);
+    transform: scaleX(0); transition: transform 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+  .nav-links a.active { color: var(--accent); }
+
+  /* ── HERO ── */
+  #hero {
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 40px 80px;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+  }
+
+  .hero-orb {
+    position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+  }
+  .hero-orb-1 {
+    width: 600px; height: 600px; top: -200px; left: -200px;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+    animation: float1 8s ease-in-out infinite;
+  }
+  .hero-orb-2 {
+    width: 500px; height: 500px; bottom: -150px; right: -150px;
+    background: radial-gradient(circle, rgba(123,97,255,0.08) 0%, transparent 70%);
+    animation: float2 10s ease-in-out infinite;
+  }
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-30px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,20px)} }
+
+  .hero-tag {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    padding: 6px 16px; border-radius: 20px;
+    margin-bottom: 32px;
+    position: relative; z-index: 2;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 10vw, 130px);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    position: relative; z-index: 2;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  .hero-title .line1 { color: var(--text); display: block; }
+  .hero-title .line2 {
+    display: block;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-title .line3 { color: var(--text); display: block; }
+
+  .hero-sub {
+    font-size: 15px; color: var(--text-muted); max-width: 560px;
+    margin: 28px auto 0;
+    font-weight: 300; letter-spacing: 0.02em;
+    position: relative; z-index: 2;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-meta {
+    display: flex; gap: 32px; margin-top: 48px;
+    justify-content: center; flex-wrap: wrap;
+    position: relative; z-index: 2;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+  .hero-meta-item {
+    text-align: left;
+    border-left: 2px solid var(--border);
+    padding-left: 16px;
+  }
+  .hero-meta-item .label {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .hero-meta-item .value {
+    font-size: 14px; font-weight: 500; color: var(--text);
+    margin-top: 2px;
+  }
+
+  .hero-scroll {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    z-index: 2;
+    animation: fadeUp 1s 0.6s ease both;
+  }
+  .hero-scroll span {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse { 0%,100%{opacity:0.3;transform:scaleY(0.8)} 50%{opacity:1;transform:scaleY(1)} }
+
+  /* ── SECTIONS ── */
+  section { position: relative; z-index: 2; }
+
+  .section-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 120px 40px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 24px; height: 1px; background: var(--accent);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1; letter-spacing: 0.02em;
+    margin-bottom: 24px;
+  }
+  .section-title .accent { color: var(--accent); }
+  .section-title .accent2 { color: var(--accent2); }
+
+  .section-lead {
+    font-size: 17px; color: var(--text-dim);
+    max-width: 680px; line-height: 1.8;
+    margin-bottom: 64px;
+    font-weight: 300;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* ── INTRO ── */
+  #intro { background: var(--surface); }
+
+  .intro-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+    margin-top: 48px;
+  }
+  .intro-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .intro-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .intro-card:hover { border-color: rgba(0,229,255,0.2); transform: translateY(-4px); }
+  .intro-card:hover::before { transform: scaleX(1); }
+  .intro-card-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px; font-size: 18px; color: var(--accent);
+  }
+  .intro-card h3 {
+    font-size: 16px; font-weight: 600; margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  .intro-card p { font-size: 14px; color: var(--text-dim); line-height: 1.8; }
+
+  /* ── PROBLEM BANNER ── */
+  .problem-banner {
+    margin-top: 64px;
+    background: linear-gradient(135deg, rgba(0,229,255,0.05), rgba(123,97,255,0.05));
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 20px; padding: 40px 48px;
+    display: flex; gap: 32px; align-items: flex-start;
+  }
+  .problem-q {
+    font-family: var(--font-display); font-size: 80px;
+    color: var(--accent); line-height: 1; flex-shrink: 0;
+    opacity: 0.3;
+  }
+  .problem-content h3 {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em;
+    margin-bottom: 12px;
+  }
+  .problem-content p {
+    font-size: 18px; font-weight: 300; line-height: 1.7;
+    color: var(--text);
+  }
+
+  /* ── DEVELOPMENT ── */
+  #desenvolvimento { background: var(--bg); }
+
+  .dev-tabs {
+    display: flex; gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 4px;
+    margin-bottom: 48px; width: fit-content;
+  }
+  .dev-tab {
+    padding: 10px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    color: var(--text-muted); border: none; background: none;
+    transition: all 0.2s; font-family: var(--font-body);
+    white-space: nowrap;
+  }
+  .dev-tab.active {
+    background: var(--accent); color: var(--bg);
+    font-weight: 700;
+  }
+  .dev-tab:hover:not(.active) { color: var(--text); }
+
+  .dev-panel { display: none; }
+  .dev-panel.active { display: block; animation: fadeUp 0.4s ease; }
+
+  .dev-panel-header {
+    display: grid; grid-template-columns: 1fr 360px; gap: 48px;
+    margin-bottom: 48px;
+  }
+  .dev-panel-title {
+    font-family: var(--font-display); font-size: 48px; line-height: 1;
+    margin-bottom: 16px;
+  }
+  .dev-panel-lead {
+    font-size: 15px; color: var(--text-dim); line-height: 1.8;
+  }
+  .dev-stats {
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .dev-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px;
+  }
+  .dev-stat .s-num {
+    font-family: var(--font-display); font-size: 40px;
+    color: var(--accent); line-height: 1;
+  }
+  .dev-stat .s-label {
+    font-size: 12px; color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .content-blocks { display: flex; flex-direction: column; gap: 24px; }
+
+  .content-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px;
+    transition: border-color 0.3s;
+  }
+  .content-block:hover { border-color: rgba(0,229,255,0.15); }
+  .block-label {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--accent3); letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .content-block h3 {
+    font-size: 18px; font-weight: 600; margin-bottom: 14px;
+  }
+  .content-block p, .content-block li {
+    font-size: 15px; color: var(--text-dim); line-height: 1.8;
+  }
+  .content-block ul {
+    list-style: none; display: flex; flex-direction: column; gap: 8px;
+    margin-top: 12px;
+  }
+  .content-block li::before {
+    content: '→'; color: var(--accent); margin-right: 10px; font-weight: 700;
+  }
+
+  .two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+  .benefit-block {
+    background: rgba(0,255,148,0.04);
+    border: 1px solid rgba(0,255,148,0.1);
+    border-radius: 16px; padding: 28px;
+  }
+  .benefit-block .bl { color: var(--accent3); }
+  .risk-block {
+    background: rgba(255,100,100,0.04);
+    border: 1px solid rgba(255,100,100,0.1);
+    border-radius: 16px; padding: 28px;
+  }
+  .risk-block .bl { color: #ff6464; }
+  .benefit-block h3, .risk-block h3 {
+    font-size: 15px; font-weight: 600; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .benefit-block p, .risk-block p,
+  .benefit-block li, .risk-block li {
+    font-size: 14px; color: var(--text-dim); line-height: 1.8;
+  }
+  .benefit-block ul, .risk-block ul {
+    list-style: none; display: flex; flex-direction: column; gap: 6px;
+    margin-top: 8px;
+  }
+  .benefit-block li::before { content: '✓'; color: var(--accent3); margin-right: 8px; }
+  .risk-block li::before { content: '!'; color: #ff6464; margin-right: 10px; font-weight: 700; }
+
+  /* ── TECH TIMELINE ── */
+  .timeline {
+    position: relative; margin: 48px 0;
+    padding-left: 32px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), transparent);
+  }
+  .timeline-item {
+    position: relative; margin-bottom: 32px;
+    padding-left: 24px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute; left: -36px; top: 6px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+  .timeline-year {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent); letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .timeline-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .timeline-item p { font-size: 14px; color: var(--text-dim); }
+
+  /* ── ÉTICA ── */
+  #etica { background: var(--surface); }
+
+  .ethics-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    margin-bottom: 48px;
+  }
+  .ethics-card {
+    border-radius: 16px; padding: 28px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    transition: transform 0.3s;
+  }
+  .ethics-card:hover { transform: translateY(-6px); }
+  .ethics-icon {
+    font-size: 28px; margin-bottom: 16px;
+  }
+  .ethics-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .ethics-card p { font-size: 14px; color: var(--text-dim); line-height: 1.8; }
+
+  .ethics-quote {
+    background: linear-gradient(135deg, rgba(123,97,255,0.08), rgba(0,229,255,0.05));
+    border: 1px solid rgba(123,97,255,0.2);
+    border-radius: 20px; padding: 48px;
+    text-align: center; position: relative;
+    overflow: hidden;
+  }
+  .ethics-quote::before {
+    content: '"';
+    position: absolute; top: -20px; left: 24px;
+    font-family: var(--font-display); font-size: 200px;
+    color: rgba(123,97,255,0.08); line-height: 1; pointer-events: none;
+  }
+  .ethics-quote blockquote {
+    font-size: 20px; font-weight: 300; line-height: 1.7;
+    color: var(--text); font-style: italic;
+    max-width: 700px; margin: 0 auto 24px;
+    position: relative; z-index: 1;
+  }
+  .ethics-quote cite {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase;
+    font-style: normal;
+  }
+
+  .kant-box {
+    margin-top: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px;
+  }
+  .kant-item h4 {
+    font-size: 13px; font-weight: 700;
+    color: var(--accent2); letter-spacing: 0.05em;
+    margin-bottom: 8px; text-transform: uppercase;
+    font-family: var(--font-mono);
+  }
+  .kant-item p { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+
+  /* ── CONCLUSÃO ── */
+  #conclusao { background: var(--bg); }
+
+  .conclusion-hero {
+    border-radius: 24px; margin-bottom: 48px; position: relative; overflow: hidden;
+  }
+  .conclusion-hero .mr-inner {
+    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(123,97,255,0.06));
+    border: 1px solid rgba(0,229,255,0.12);
+    border-radius: 24px; padding: 56px;
+    position: relative;
+  }
+  .conclusion-hero .mr-inner::after {
+    content: '';
+    position: absolute; bottom: -60px; right: -60px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,0.12), transparent);
+    pointer-events: none;
+  }
+  .conclusion-hero h2 {
+    font-family: var(--font-display); font-size: 52px; line-height: 1;
+    margin-bottom: 24px;
+  }
+  .conclusion-hero p {
+    font-size: 16px; color: var(--text-dim); line-height: 1.8;
+    max-width: 680px;
+  }
+
+  .principles {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+    margin-top: 48px;
+  }
+  .principle {
+    display: flex; gap: 20px; align-items: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+    transition: border-color 0.3s;
+  }
+  .principle:hover { border-color: rgba(0,229,255,0.2); }
+  .principle-num {
+    font-family: var(--font-display); font-size: 36px;
+    color: var(--accent); opacity: 0.3; line-height: 1; flex-shrink: 0;
+  }
+  .principle h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .principle p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+
+  /* ── BIBLIGRAFIA ── */
+  #bibliografia { background: var(--surface); }
+
+  .bib-list { display: flex; flex-direction: column; gap: 16px; }
+  .bib-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; gap: 20px; align-items: flex-start;
+    transition: border-color 0.3s;
+  }
+  .bib-item:hover { border-color: rgba(0,229,255,0.15); }
+  .bib-num {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--accent); flex-shrink: 0; padding-top: 2px;
+  }
+  .bib-text { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+  .bib-text strong { color: var(--text); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 40px;
+    text-align: center;
+    position: relative; z-index: 2;
+  }
+  .footer-logo {
+    font-family: var(--font-display); font-size: 32px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  footer p { font-size: 12px; color: var(--text-muted); }
+
+  /* ── BACK TO TOP ── */
+  #btt {
+    position: fixed; bottom: 32px; right: 32px; z-index: 999;
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--accent); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all 0.3s;
+    opacity: 0; transform: translateY(10px);
+  }
+  #btt.show { opacity: 1; transform: translateY(0); }
+  #btt:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  /* ── PROGRESS BAR ── */
+  #progress {
+    position: fixed; top: 64px; left: 0; right: 0; z-index: 999;
+    height: 2px; background: transparent;
+  }
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%; transition: width 0.1s;
+  }
+
+  /* ══════════════════════════════════════════
+     SISTEMA CHALETÔ — ANIMAÇÕES PREMIUM
+     easing: cubic-bezier(0.23, 1, 0.32, 1)
+     Ease Out Quint — suavidade máxima no fim
+  ══════════════════════════════════════════ */
+  :root {
+    --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+    --fade-dur: 0.9s;
+    --split-dur: 0.85s;
+    --mask-dur: 1.25s;
+  }
+
+  /* ── LOADER ── */
+  #page-loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #080a0f;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0;
+  }
+  #page-loader .ld-logo {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 6vw, 72px);
+    letter-spacing: 0.12em;
+    color: var(--text);
+    opacity: 0;
+    animation: ld-appear 0.6s var(--ease-out-quint) 0.2s forwards;
+  }
+  #page-loader .ld-accent {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.3em;
+    color: var(--accent); text-transform: uppercase;
+    opacity: 0; transform: translateY(100%);
+    animation: ld-slide 0.6s var(--ease-out-quint) 0.5s forwards;
+    margin-top: 8px;
+  }
+  #page-loader .ld-bar-wrap {
+    width: 180px; height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin-top: 32px; overflow: hidden;
+    border-radius: 1px;
+  }
+  #page-loader .ld-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    animation: ld-bar 1s var(--ease-out-quint) 0.6s forwards;
+  }
+  @keyframes ld-appear { to { opacity: 1; } }
+  @keyframes ld-slide  { to { opacity: 1; transform: translateY(0); } }
+  @keyframes ld-bar    { to { width: 100%; } }
+  @keyframes ld-out    { to { opacity: 0; pointer-events: none; } }
+  .loader-exit { animation: ld-out 0.7s var(--ease-out-quint) forwards !important; }
+
+  /* ── HERO ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── DATA-FADE-IN ── */
+  [data-fade-in] {
+    opacity: 0;
+    transform: translate3d(var(--fi-x, 0px), 28px, 0);
+  }
+  [data-fade-in].fade-in--visible {
+    opacity: 1;
+    transform: translateZ(0);
+    transition:
+      opacity var(--fade-dur) var(--ease-out-quint),
+      transform var(--fade-dur) var(--ease-out-quint);
+    transition-delay: var(--fade-delay, 0s);
+  }
+
+  /* ── DATA-SPLIT-TEXT ── */
+  [data-split-text] .st-overflow { overflow: hidden; display: block; }
+  [data-split-text] .st-line {
+    display: block;
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+  [data-split-text].split--visible .st-line {
+    opacity: 1;
+    transform: translateZ(0);
+    transition:
+      opacity var(--split-dur) var(--ease-out-quint),
+      transform var(--split-dur) var(--ease-out-quint);
+    transition-delay: calc(var(--line-index, 0) * 0.12s + var(--split-start, 0s));
+  }
+
+  /* ── DATA-MASK-REVEAL (Chaletô Combined Animation) ── */
+  [data-mask-reveal] {
+    overflow: hidden;
+    position: relative;
+  }
+  [data-mask-reveal] .mr-inner {
+    transform: scale(1.12);
+    mask-image: linear-gradient(#000, #000);
+    mask-position: center bottom;
+    mask-repeat: no-repeat;
+    mask-size: 100% 0%;
+    -webkit-mask-image: linear-gradient(#000, #000);
+    -webkit-mask-position: center bottom;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 0%;
+    transition:
+      mask-size var(--mask-dur) var(--ease-out-quint),
+      -webkit-mask-size var(--mask-dur) var(--ease-out-quint),
+      transform var(--mask-dur) var(--ease-out-quint);
+    transition-delay: var(--mask-delay, 0s);
+  }
+  [data-mask-reveal].mask--visible .mr-inner {
+    mask-size: 100% 100%;
+    -webkit-mask-size: 100% 100%;
+    transform: scale(1);
+  }
+
+  /* ── DATA-LINE-DRAW (borders that draw themselves) ── */
+  [data-line-draw] {
+    position: relative;
+  }
+  [data-line-draw]::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 0%; height: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 1.1s var(--ease-out-quint);
+    transition-delay: var(--line-delay, 0s);
+  }
+  [data-line-draw].line--visible::after { width: 100%; }
+
+  /* ── STAGGER CHILDREN (cards, bib items, etc.) ── */
+  [data-stagger] > * {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition:
+      opacity 0.75s var(--ease-out-quint),
+      transform 0.75s var(--ease-out-quint);
+  }
+  [data-stagger].stagger--visible > *:nth-child(1)  { transition-delay: 0.00s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(2)  { transition-delay: 0.09s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(3)  { transition-delay: 0.18s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(4)  { transition-delay: 0.27s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(5)  { transition-delay: 0.36s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(6)  { transition-delay: 0.45s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(7)  { transition-delay: 0.54s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(8)  { transition-delay: 0.63s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(9)  { transition-delay: 0.72s; opacity:1; transform:translateZ(0); }
+  [data-stagger].stagger--visible > *:nth-child(10) { transition-delay: 0.81s; opacity:1; transform:translateZ(0); }
+
+  /* ── LEGACY .reveal compatibility (now driven by Chaletô) ── */
+  .reveal { opacity: 0; transform: translateY(28px); }
+  .reveal.visible {
+    opacity: 1; transform: translateY(0);
+    transition: opacity 0.85s var(--ease-out-quint), transform 0.85s var(--ease-out-quint);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .section-inner { padding: 80px 24px; }
+    .intro-grid { grid-template-columns: 1fr; }
+    .dev-panel-header { grid-template-columns: 1fr; }
+    .two-cols { grid-template-columns: 1fr; }
+    .ethics-grid { grid-template-columns: 1fr; }
+    .kant-box { grid-template-columns: 1fr; }
+    .principles { grid-template-columns: 1fr; }
+    .problem-banner { flex-direction: column; }
+    .dev-tabs { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGE LOADER -->
+<div id="page-loader">
+  <div class="ld-logo">IA × DESPORTO</div>
+  <div class="ld-accent">Área de Integração · 12.º GD · 2026</div>
+  <div class="ld-bar-wrap"><div class="ld-bar"></div></div>
+</div>
+
+<canvas id="bio-canvas" style="position:fixed;inset:0;z-index:1;pointer-events:none;"></canvas>
+<div id="cursor-glow"></div>
+<div id="progress"><div id="progress-bar"></div></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">IA × Desporto</div>
+  <ul class="nav-links">
+    <li><a href="#hero" class="active">Capa</a></li>
+    <li><a href="#intro">Introdução</a></li>
+    <li><a href="#desenvolvimento">Desenvolvimento</a></li>
+    <li><a href="#etica">Ética</a></li>
+    <li><a href="#conclusao">Conclusão</a></li>
+    <li><a href="#bibliografia">Bibliografia</a></li>
+  </ul>
+</nav>
+
+<!-- HERO / CAPA -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+
+  <div class="hero-tag">Área de Integração · 12.º GD · 2026</div>
+
+  <h1 class="hero-title">
+    <span class="line1">TECNOLOGIA</span>
+    <span class="line2">& INTELIGÊNCIA</span>
+    <span class="line3">ARTIFICIAL</span>
+  </h1>
+
+  <p class="hero-sub">
+    Uso de dados e algoritmos no desempenho dos atletas · Justiça nas decisões · Privacidade e ética desportiva
+  </p>
+
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <div class="label">Autores</div>
+      <div class="value">Afonso Soares &amp; Simão Calôbra</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="label">Turma</div>
+      <div class="value">12.º GD — Gestão Desportiva</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="label">Data</div>
+      <div class="value">Março de 2026</div>
+    </div>
+    <div class="hero-meta-item">
+      <div class="label">Professor</div>
+      <div class="value">Celestino Silva</div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <span>Explorar</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- INTRODUÇÃO -->
+<section id="intro">
+  <div class="section-inner">
+    <p class="section-label" data-fade-in style="--fade-delay:0s">01 — Introdução</p>
+    <h2 class="section-title" data-split-text>
+      <span class="st-overflow"><span class="st-line" style="--line-index:0">O Desporto na <span class="accent">Era Digital</span></span></span>
+    </h2>
+    <p class="section-lead" data-fade-in style="--fade-delay:0.2s">
+      A convergência entre tecnologia e desporto representa uma das transformações mais profundas da nossa época.
+      Algoritmos, sensores e plataformas de inteligência artificial redefinem o modo como os atletas treinam, competem e são avaliados.
+    </p>
+
+    <div class="intro-grid" data-stagger>
+      <div class="intro-card">
+        <div class="intro-card-icon"><i class="fas fa-database"></i></div>
+        <h3>Análise de Dados</h3>
+        <p>Sistemas como o STATS Perform ou o Catapult Sports recolhem milhares de variáveis por segundo, permitindo uma compreensão sem precedentes do desempenho humano em contexto desportivo.</p>
+      </div>
+      <div class="intro-card">
+        <div class="intro-card-icon"><i class="fas fa-gavel"></i></div>
+        <h3>Decisão Assistida</h3>
+        <p>O VAR, o Hawk-Eye e o Goal-Line Technology são hoje parte integrante de competições de alto nível, prometendo uma arbitragem mais justa e transparente — mas levantando novas questões.</p>
+      </div>
+      <div class="intro-card">
+        <div class="intro-card-icon"><i class="fas fa-shield-halved"></i></div>
+        <h3>Dados Biométricos</h3>
+        <p>Wearables, GPS e sensores cardíacos geram um fluxo contínuo de dados pessoais dos atletas, cujo acesso, armazenamento e uso levantam sérias preocupações éticas e legais.</p>
+      </div>
+      <div class="intro-card">
+        <div class="intro-card-icon"><i class="fas fa-brain"></i></div>
+        <h3>Machine Learning</h3>
+        <p>Modelos preditivos identificam padrões de lesão, recrutam talentos e definem estratégias táticas, substituindo parte do julgamento humano por cálculo estatístico.</p>
+      </div>
+    </div>
+
+    <div class="problem-banner" data-fade-in style="--fade-delay:0.1s">
+      <div class="problem-q">?</div>
+      <div class="problem-content">
+        <h3>Problema Científico Central</h3>
+        <p>Até que ponto é ético, justo e seguro o uso de inteligência artificial e dados no contexto desportivo — e como podem ser estabelecidos limites que protejam os atletas enquanto se preserva o progresso tecnológico?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DESENVOLVIMENTO -->
+<section id="desenvolvimento">
+  <div class="section-inner">
+    <p class="section-label" data-fade-in style="--fade-delay:0s">02 — Desenvolvimento</p>
+    <h2 class="section-title" data-split-text>
+      <span class="st-overflow"><span class="st-line" style="--line-index:0">Análise <span class="accent2">Aprofundada</span></span></span>
+    </h2>
+    <p class="section-lead" data-fade-in style="--fade-delay:0.2s">Três dimensões centrais que definem o impacto da tecnologia no desporto contemporâneo.</p>
+
+    <div class="dev-tabs">
+      <button class="dev-tab active" onclick="showTab(0)">Dados & Desempenho</button>
+      <button class="dev-tab" onclick="showTab(1)">Justiça nas Decisões</button>
+      <button class="dev-tab" onclick="showTab(2)">Privacidade</button>
+    </div>
+
+    <!-- PAINEL 1 -->
+    <div class="dev-panel active" id="panel-0">
+      <div class="dev-panel-header">
+        <div>
+          <div class="dev-panel-title">Dados &amp;<br><span style="color:var(--accent)">Desempenho</span></div>
+          <p class="dev-panel-lead">A era do big data transformou radicalmente a forma como os atletas são monitorizados, treinados e avaliados. Algoritmos sofisticados analisam desde a biomecânica ao sono, passando pela nutrição e carga de treino.</p>
+        </div>
+        <div class="dev-stats">
+          <div class="dev-stat">
+            <div class="s-num">2.5M</div>
+            <div class="s-label">pontos de dados por jogo da NBA (SportVU)</div>
+          </div>
+          <div class="dev-stat">
+            <div class="s-num">40%</div>
+            <div class="s-label">redução de lesões com wearables (Catapult)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-blocks">
+        <div class="content-block" data-fade-in>
+          <div class="block-label">Funcionamento</div>
+          <h3>Como Funcionam os Sistemas de Análise</h3>
+          <p>Plataformas como o <strong>STATS Perform</strong>, o <strong>Catapult Sports</strong> e o <strong>Kinexon</strong> integram dados de GPS, acelerómetros, giroscópios e sensores cardíacos em tempo real. Os modelos de machine learning identificam padrões que o olho humano é incapaz de detetar — como micro-alterações na passada que antecipam uma lesão muscular. O FC Barcelona, por exemplo, utiliza inteligência artificial para modelar o desempenho dos jogadores e otimizar a sua recuperação entre jogos.</p>
+        </div>
+
+        <div class="two-cols" data-fade-in>
+          <div class="benefit-block">
+            <h3><span class="bl"><i class="fas fa-check-circle"></i></span> Benefícios</h3>
+            <ul>
+              <li>Personalização absoluta do treino por atleta</li>
+              <li>Prevenção proativa de lesões musculares</li>
+              <li>Análise táctica e de scouting avançada</li>
+              <li>Monitorização da fadiga e recuperação</li>
+              <li>Tomada de decisão baseada em evidências</li>
+            </ul>
+          </div>
+          <div class="risk-block">
+            <h3><span class="bl"><i class="fas fa-exclamation-triangle"></i></span> Riscos</h3>
+            <ul>
+              <li>Redução do atleta a um conjunto de métricas</li>
+              <li>Dependência excessiva de dados</li>
+              <li>Exclusão de atletas com menos recursos</li>
+              <li>Viés algorítmico em modelos preditivos</li>
+              <li>Perda do papel do treinador experiente</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="content-block" data-fade-in>
+          <div class="block-label">Evolução Histórica</div>
+          <h3>Da Cronometragem Manual à IA Preditiva</h3>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-year">1970s</div>
+              <h4>Análise Vídeo Rudimentar</h4>
+              <p>Os primeiros sistemas de análise desportiva baseavam-se em gravações em VHS e na observação manual de treinadores.</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-year">1990s</div>
+              <h4>Software de Análise de Jogo</h4>
+              <p>Surgem as primeiras plataformas digitais de análise táctica, como o ProZone, usadas em equipas de futebol profissional.</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-year">2013</div>
+              <h4>Wearables e GPS em Tempo Real</h4>
+              <p>O Catapult Sports populariza o uso de GPS nos coletes de treino, permitindo monitorizar distâncias, velocidades e carga de trabalho.</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-year">2020s</div>
+              <h4>Inteligência Artificial Preditiva</h4>
+              <p>Machine learning e computer vision permitem prever lesões, otimizar recuperações e automatizar o scouting de talentos globalmente.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL 2 -->
+    <div class="dev-panel" id="panel-1">
+      <div class="dev-panel-header">
+        <div>
+          <div class="dev-panel-title">Justiça nas<br><span style="color:var(--accent)">Decisões</span></div>
+          <p class="dev-panel-lead">A tecnologia de arbitragem promete eliminar o erro humano das competições desportivas. Mas será que mais precisão significa mais justiça? A questão é mais complexa do que aparenta.</p>
+        </div>
+        <div class="dev-stats">
+          <div class="dev-stat">
+            <div class="s-num">95%</div>
+            <div class="s-label">precisão do VAR nas decisões de fora-de-jogo (FIFA)</div>
+          </div>
+          <div class="dev-stat">
+            <div class="s-num">3.8min</div>
+            <div class="s-label">tempo médio de revisão VAR por decisão</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-blocks">
+        <div class="content-block" data-fade-in>
+          <div class="block-label">Tecnologias de Arbitragem</div>
+          <h3>O Arsenal Tecnológico do Desporto Moderno</h3>
+          <p>O <strong>VAR (Video Assistant Referee)</strong> analisa lances polémicos com múltiplos ângulos de câmara em alta definição. O <strong>Hawk-Eye</strong> reconstrói a trajetória da bola em 3D no ténis e no cricket. O <strong>Goal-Line Technology</strong> usa até 14 câmaras para confirmar se a bola ultrapassou a linha de golo. O mais recente sistema <strong>SAOT (Semi-Automated Offside Technology)</strong>, da FIFA, usa IA e limbs tracking para decidir foras-de-jogo em milissegundos.</p>
+        </div>
+
+        <div class="two-cols" data-fade-in>
+          <div class="benefit-block">
+            <h3><span class="bl"><i class="fas fa-balance-scale"></i></span> Benefícios</h3>
+            <ul>
+              <li>Redução drástica de erros arbitrais decisivos</li>
+              <li>Maior equidade entre equipas rivais</li>
+              <li>Transparência nas decisões contestadas</li>
+              <li>Responsabilização documentada e reversível</li>
+              <li>Proteção dos atletas de decisões injustas</li>
+            </ul>
+          </div>
+          <div class="risk-block">
+            <h3><span class="bl"><i class="fas fa-times-circle"></i></span> Problemas</h3>
+            <ul>
+              <li>Interrupção do fluxo e emoção do jogo</li>
+              <li>Quem assume responsabilidade por erros da IA?</li>
+              <li>Margem de erro milimétrica irrelevante na prática</li>
+              <li>Desigualdade no acesso a estas tecnologias</li>
+              <li>Interpretação subjetiva persiste mesmo com imagens</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="content-block" data-fade-in>
+          <div class="block-label">Análise Crítica</div>
+          <h3>Mais Precisão Não Equivale Automaticamente a Mais Justiça</h3>
+          <p>Um fora-de-jogo de 2mm detetado por IA é matematicamente correto, mas levanta uma questão filosófica pertinente: haverá uma diferença que qualquer árbitro humano consiga percecionar? A tecnologia introduz uma precisão que ultrapassa as capacidades sensoriais humanas, alterando fundamentalmente o conceito de "vantagem" no desporto. Além disso, a demora nas revisões fragmenta a continuidade emocional que torna o desporto apaixonante para milhões. A questão que se coloca não é se a tecnologia é mais precisa — é evidente que sim —, mas se essa precisão serve os valores do desporto.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINEL 3 -->
+    <div class="dev-panel" id="panel-2">
+      <div class="dev-panel-header">
+        <div>
+          <div class="dev-panel-title">Privacidade<br><span style="color:var(--accent)">dos Atletas</span></div>
+          <p class="dev-panel-lead">Os atletas profissionais geram volumes enormes de dados biométricos e comportamentais. Quem tem acesso a esta informação, como é utilizada e quem protege o atleta de eventuais abusos?</p>
+        </div>
+        <div class="dev-stats">
+          <div class="dev-stat">
+            <div class="s-num">+300</div>
+            <div class="s-label">variáveis biométricas recolhidas por jogo moderno</div>
+          </div>
+          <div class="dev-stat">
+            <div class="s-num">RGPD</div>
+            <div class="s-label">regulamento europeu de proteção de dados (2018)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-blocks">
+        <div class="content-block" data-fade-in>
+          <div class="block-label">Dados Biométricos</div>
+          <h3>O Que São e Como São Recolhidos</h3>
+          <p>Os atletas modernos são monitorizados através de <strong>GPS integrado em coletes</strong>, sensores de frequência cardíaca, acelerómetros, plataformas de força e até tecnologias de análise do sono. Estes dispositivos geram dados contínuos sobre localização, carga cardiovascular, padrões de movimento, composição corporal e estado psicológico. Empresas como a <strong>Whoop</strong> e a <strong>Oura</strong> comercializam estes dispositivos, e os dados recolhidos podem ser partilhados com clubes, marcas desportivas, agentes e — em casos polémicos — seguradoras e entidades patronais.</p>
+        </div>
+
+        <div class="content-block" data-fade-in>
+          <div class="block-label">Enquadramento Legal</div>
+          <h3>O RGPD e a Proteção dos Atletas</h3>
+          <p>O <strong>Regulamento Geral de Proteção de Dados</strong> (RGPD), em vigor na União Europeia desde 2018, classifica os dados biométricos como <em>dados sensíveis de categoria especial</em>, exigindo consentimento explícito para o seu tratamento. No entanto, a relação de poder assimétrica entre um atleta e o seu clube coloca em causa a genuinidade desse consentimento — um jovem futebolista pode sentir-se pressionado a aceitar condições de monitorização como condição implícita do seu contrato.</p>
+          <ul>
+            <li>Dados de saúde não podem ser partilhados com terceiros sem consentimento explícito</li>
+            <li>O atleta tem direito de acesso, retificação e eliminação dos seus dados</li>
+            <li>A monitorização fora do horário laboral é legalmente questionável</li>
+            <li>Casos documentados de discriminação contratual com base em dados biométricos</li>
+          </ul>
+        </div>
+
+        <div class="two-cols" data-fade-in>
+          <div class="benefit-block">
+            <h3><span class="bl"><i class="fas fa-heartbeat"></i></span> Benefícios Possíveis</h3>
+            <ul>
+              <li>Deteção precoce de sobrecargas e lesões iminentes</li>
+              <li>Planeamento personalizado da recuperação</li>
+              <li>Melhor comunicação atleta-equipa técnica</li>
+              <li>Histórico médico integrado e acessível</li>
+            </ul>
+          </div>
+          <div class="risk-block">
+            <h3><span class="bl"><i class="fas fa-user-secret"></i></span> Riscos Reais</h3>
+            <ul>
+              <li>Uso de dados de saúde em negociações contratuais</li>
+              <li>Partilha não autorizada com seguradoras</li>
+              <li>Pressão para treinar lesionado com base em métricas</li>
+              <li>Vigilância permanente fora do contexto desportivo</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ÉTICA -->
+<section id="etica">
+  <div class="section-inner">
+    <p class="section-label" data-fade-in style="--fade-delay:0s">03 — Discussão Ética</p>
+    <h2 class="section-title" data-split-text>
+      <span class="st-overflow"><span class="st-line" style="--line-index:0">Reflexão <span class="accent">Crítica</span></span></span>
+    </h2>
+    <p class="section-lead" data-fade-in style="--fade-delay:0.2s">A introdução da inteligência artificial no desporto coloca dilemas éticos profundos que exigem uma análise rigorosa à luz de princípios filosóficos e valores desportivos fundamentais.</p>
+
+    <div class="ethics-grid" data-stagger>
+      <div class="ethics-card">
+        <div class="ethics-icon">⚖️</div>
+        <h3>Equidade e Desigualdade</h3>
+        <p>O acesso às tecnologias de ponta está concentrado em clubes e federações com elevado poder económico. Um jovem atleta de um país em desenvolvimento compete, de facto, em condições muito diferentes de um que beneficia de análise de IA e wearables de última geração. A tecnologia pode, paradoxalmente, aprofundar as desigualdades que o desporto procura transcender.</p>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-icon">🧬</div>
+        <h3>Desumanização do Atleta</h3>
+        <p>Quando um atleta é avaliado primariamente pelas suas métricas — VO₂ máx, taxa de aceleração, TRIMP — reduz-se uma expressão humana complexa a um conjunto de variáveis otimizáveis. A ética kantiana alerta-nos: o ser humano deve ser sempre tratado como fim em si mesmo, nunca como meio ou como dado.</p>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-icon">🔒</div>
+        <h3>Autonomia e Consentimento</h3>
+        <p>O consentimento informado é um pilar da ética médica e jurídica. No contexto desportivo, porém, o atleta encontra-se frequentemente numa posição em que recusar a monitorização pode significar perder o lugar na equipa — tornando o "consentimento" numa ficção jurídica que encobre uma coerção real.</p>
+      </div>
+    </div>
+
+    <div class="ethics-quote" data-fade-in style="--fade-delay:0.1s">
+      <blockquote>
+        "Age apenas segundo uma máxima tal que possas ao mesmo tempo querer que ela se torne uma lei universal."
+      </blockquote>
+      <cite>Immanuel Kant, Fundamentação da Metafísica dos Costumes (1785)</cite>
+    </div>
+
+    <div class="kant-box" data-stagger>
+      <div class="kant-item">
+        <h4>Ética Kantiana</h4>
+        <p>Aplicada ao desporto, o imperativo categórico exige que as regras de uso de dados dos atletas sejam aplicáveis universalmente — sem exceções baseadas em poder económico ou pressão contratual.</p>
+      </div>
+      <div class="kant-item">
+        <h4>Utilitarismo</h4>
+        <p>A perspetiva utilitarista (Bentham, Mill) justificaria o uso de dados se o benefício coletivo — menos lesões, melhor desempenho, maior espetáculo — superar o custo individual em privacidade.</p>
+      </div>
+      <div class="kant-item">
+        <h4>Ética da Virtude</h4>
+        <p>Aristóteles perguntaria: que tipo de desportistas e sociedade queremos ser? A dependência tecnológica enfraquece as virtudes de resiliência, intuição e julgamento que o desporto foi sempre um veículo para cultivar?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONCLUSÃO -->
+<section id="conclusao">
+  <div class="section-inner">
+    <p class="section-label" data-fade-in style="--fade-delay:0s">04 — Conclusão</p>
+    <h2 class="section-title" data-split-text>
+      <span class="st-overflow"><span class="st-line" style="--line-index:0">Opinião <span class="accent">Fundamentada</span></span></span>
+    </h2>
+
+    <div class="conclusion-hero" data-mask-reveal style="--mask-delay:0.1s"><div class="mr-inner">
+      <h2>A Tecnologia ao<br>Serviço do Atleta</h2>
+      <p>
+        Após uma análise aprofundada das três dimensões centrais — desempenho, decisão e privacidade —, concluímos que a inteligência artificial e os sistemas de dados representam um avanço genuinamente transformador para o desporto. A capacidade de prever lesões, otimizar treinos e tornar arbitragens mais rigorosas são conquistas inegáveis que beneficiam atletas, espetadores e o integridade das competições.
+      </p>
+      <br>
+      <p>
+        No entanto, este progresso só é eticamente sustentável se orientado por três princípios fundamentais: <strong>transparência</strong>, no modo como os dados são recolhidos e usados; <strong>regulação</strong> efetiva que proteja os atletas de abusos; e <strong>centralidade do ser humano</strong>, garantindo que o atleta é sempre o beneficiário — e nunca o produto — da tecnologia. A IA deve ser uma ferramenta ao serviço do desporto, não o contrário.
+      </p>
+    </div></div>
+
+    <div class="principles" data-stagger>
+      <div class="principle">
+        <div class="principle-num">01</div>
+        <div>
+          <h4>Consentimento Genuíno</h4>
+          <p>O atleta deve ter poder real para aceitar ou recusar a recolha de dados, sem consequências contratuais implícitas. O consentimento sob pressão não é ético nem juridicamente válido.</p>
+        </div>
+      </div>
+      <div class="principle">
+        <div class="principle-num">02</div>
+        <div>
+          <h4>Acesso Equitativo</h4>
+          <p>As federações desportivas devem promover mecanismos de acesso democrático à tecnologia, evitando que a IA se torne um fator adicional de desigualdade competitiva.</p>
+        </div>
+      </div>
+      <div class="principle">
+        <div class="principle-num">03</div>
+        <div>
+          <h4>Responsabilidade Humana</h4>
+          <p>As decisões de arbitragem e de gestão de atletas assistidas por IA devem manter sempre um humano responsável. A máquina informa — não decide sozinha.</p>
+        </div>
+      </div>
+      <div class="principle">
+        <div class="principle-num">04</div>
+        <div>
+          <h4>Transparência Algorítmica</h4>
+          <p>Os atletas e as suas equipas devem ter acesso pleno à lógica dos algoritmos que os avaliam e que influenciam decisões sobre as suas carreiras.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BIBLIOGRAFIA -->
+<section id="bibliografia">
+  <div class="section-inner">
+    <p class="section-label" data-fade-in style="--fade-delay:0s">05 — Referências</p>
+    <h2 class="section-title" data-split-text>
+      <span class="st-overflow"><span class="st-line" style="--line-index:0">Bibliografia</span></span>
+    </h2>
+    <p class="section-lead" data-fade-in style="--fade-delay:0.15s">Referências em formato APA utilizadas na elaboração deste trabalho.</p>
+
+    <div class="bib-list" data-stagger>
+      <div class="bib-item">
+        <div class="bib-num">[01]</div>
+        <div class="bib-text"><strong>Memmert, D., & Raabe, D.</strong> (2018). <em>Data Analytics in Football: Positional Data Collection, Modelling and Analysis.</em> Routledge. https://doi.org/10.4324/9781351210164</div>
+      </div>
+      <div class="bib-item">
+        <div class="bib-num">[02]</div>
+        <div class="bib-text"><strong>Bunker, R. P., & Thabtah, F.</strong> (2019). A machine learning framework for sport result prediction. <em>Applied Computing and Informatics, 15</em>(1), 27–33. https://doi.org/10.1016/j.aci.2017.09.005</div>
+      </div>
+      <div class="bib-item">
+        <div class="bib-num">[03]</div>
+        <div class="bib-text"><strong>Regulamento (UE) 2016/679 do Parlamento Europeu e do Conselho</strong> (2016). Regulamento Geral sobre a Proteção de Dados. <em>Jornal Oficial da União Europeia.</em> https://eur-lex.europa.eu/legal-content/PT/TXT/?uri=CELEX:32016R0679</div>
+      </div>
+      <div class="bib-item">
+        <div class="bib-num">[04]</div>
+        <div class="bib-text"><strong>FIFA</strong> (2022). <em>Semi-Automated Offside Technology: How it works.</em> Fédération Internationale de Football Association. https://www.fifa.com/technical/football-technology/standards/semi-automated-offside-technology</div>
+      </div>
+      <div class="bib-item">
+        <div class="bib-num">[05]</div>
+        <div class="bib-text"><strong>Catapult Sports</strong> (2023). <em>Athlete monitoring and performance analytics: Impact report 2023.</em> Catapult International. https://www.catapult.com/resources</div>
+      </div>
+      <div class="bib-item">
+        <div class="bib-num">[06]</div>
+        <div class="bib-text"><strong>Kant, I.</strong> (1785/2007). <em>Fundamentação da Metafísica dos Costumes</em> (trad. P. Quintela). Edições 70.</div>
+      </div>
+      <div class="bib-item">
+        <div class="bib-num">[07]</div>
+        <div class="bib-text"><strong>Anderson, C., & Sally, D.</strong> (2013). <em>The Numbers Game: Why Everything You Know About Football is Wrong.</em> Viking Press.</div>
+      </div>
+      <div class="bib-item">
+        <div class="bib-num">[08]</div>
+        <div class="bib-text"><strong>Conselho da Europa</strong> (2021). <em>Artificial intelligence and sport: Ethical considerations and governance challenges.</em> Council of Europe Publishing. https://www.coe.int/en/web/sport</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">IA × DESPORTO</div>
+  <p>Afonso Soares &amp; Simão Calôbra · 12.º GD · Área de Integração · Prof. Celestino Silva · Março 2026</p>
+</footer>
+
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">
+  <i class="fas fa-arrow-up"></i>
+</button>
+
+<script>
+  // ── CURSOR GLOW ──
+  const glow = document.getElementById('cursor-glow');
+  document.addEventListener('mousemove', e => {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  });
+
+  // ── PROGRESS BAR ──
+  const bar = document.getElementById('progress-bar');
+  window.addEventListener('scroll', () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = (window.scrollY / max * 100) + '%';
+  });
+
+  // ── BACK TO TOP ──
+  const btt = document.getElementById('btt');
+  window.addEventListener('scroll', () => {
+    btt.classList.toggle('show', window.scrollY > 400);
+  });
+
+  // ── ACTIVE NAV ──
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -40% 0px' });
+  sections.forEach(s => observer.observe(s));
+
+  // ── REVEAL ON SCROLL ──
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        revealObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+  // ── TABS ──
+  function showTab(idx) {
+    document.querySelectorAll('.dev-panel').forEach((p, i) => {
+      p.classList.toggle('active', i === idx);
+    });
+    document.querySelectorAll('.dev-tab').forEach((t, i) => {
+      t.classList.toggle('active', i === idx);
+    });
+  }
+
+  // ── HERO PARALLAX ──
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    document.querySelector('.hero-grid').style.transform = `translateY(${y * 0.3}px)`;
+    document.querySelector('.hero-orb-1').style.transform = `translate(${y*0.05}px, ${-y*0.08}px)`;
+    document.querySelector('.hero-orb-2').style.transform = `translate(${-y*0.04}px, ${y*0.06}px)`;
+  });
+
+  // ══════════════════════════════════════════════════════
+  // SCROLL EFFECT: BIOMETRIC DATA STREAM
+  // Canvas lateral que simula monitorização de atleta
+  // em tempo real — frequência cardíaca, GPS, carga —
+  // reagindo ao scroll como um sensor desportivo vivo.
+  // ══════════════════════════════════════════════════════
+
+  const canvas = document.getElementById('bio-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resizeCanvas() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  // — ECG / Heart-rate waveform —
+  // One full cycle (PQRST) as normalised x→y points
+  const ecgCycle = [
+    [0,    0   ], [0.05, 0   ], [0.08, -0.06], [0.11,  0   ],
+    [0.14,  0   ], [0.17, -0.1 ], [0.20,  0.85], [0.22, -0.5 ],
+    [0.24,  0   ], [0.30,  0   ], [0.34, -0.18], [0.38, -0.22],
+    [0.42, -0.18], [0.50,  0   ], [0.55,  0.1 ], [0.62,  0   ],
+    [1.00,  0   ]
+  ];
+
+  function ecgY(t) {
+    // t in [0,1] — interpolate over ecgCycle
+    t = ((t % 1) + 1) % 1;
+    for (let i = 0; i < ecgCycle.length - 1; i++) {
+      const [x0, y0] = ecgCycle[i];
+      const [x1, y1] = ecgCycle[i+1];
+      if (t >= x0 && t <= x1) {
+        const f = (t - x0) / (x1 - x0);
+        return y0 + (y1 - y0) * f;
+      }
+    }
+    return 0;
+  }
+
+  // — Floating data-tag particles —
+  const bioTags = [
+    'HR: 178 bpm','GPS: 34.2 km/h','VO₂: 82 ml','LOAD: 847 AU',
+    'SPD: 9.4 m/s','PWR: 412 W','LAC: 6.2 mmol','HRV: 28 ms',
+    'DIST: 11.3 km','RPE: 8/10','CAD: 182 spm','ALT: 0 m',
+    'ACCEL: 3.8 m/s²','TEMP: 37.1°C','SAT: 98%','REC: 64%'
+  ];
+
+  const particles = Array.from({length: 18}, (_, i) => ({
+    label: bioTags[i % bioTags.length],
+    x: Math.random() * 1,      // normalised 0-1
+    y: Math.random() * 1,
+    vx: (Math.random() - 0.5) * 0.00015,
+    vy: (Math.random() - 0.5) * 0.00015,
+    alpha: 0.12 + Math.random() * 0.18,
+    size: 9 + Math.random() * 3,
+    scrollOffset: Math.random() * 0.5  // how much they react to scroll
+  }));
+
+  // — Data lines (horizontal scan lines) —
+  const scanLines = Array.from({length: 6}, (_, i) => ({
+    y: (i + 0.5) / 6,
+    speed: 0.0002 + Math.random() * 0.0003,
+    phase: Math.random() * Math.PI * 2,
+    amplitude: 0.012 + Math.random() * 0.02,
+    alpha: 0.04 + Math.random() * 0.05
+  }));
+
+  // — Right-side ECG strip —
+  let ecgPhase = 0;
+  let lastScroll = window.scrollY;
+  let scrollVelocity = 0;
+  let scrollBPM = 60; // bpm driven by scroll speed
+  let frameCount = 0;
+
+  const ecgHistory = new Float32Array(300).fill(0);
+
+  function draw(ts) {
+    requestAnimationFrame(draw);
+    frameCount++;
+
+    const curScroll = window.scrollY;
+    const rawVel = Math.abs(curScroll - lastScroll);
+    scrollVelocity += (rawVel - scrollVelocity) * 0.08;
+    lastScroll = curScroll;
+
+    // BPM: 55 at rest → 185 at fast scroll
+    const targetBPM = 55 + Math.min(scrollVelocity * 18, 130);
+    scrollBPM += (targetBPM - scrollBPM) * 0.04;
+
+    // ECG advance speed driven by BPM
+    ecgPhase += (scrollBPM / 60) * 0.008;
+
+    ctx.clearRect(0, 0, W, H);
+
+    const scrollRatio = curScroll / (document.documentElement.scrollHeight - window.innerHeight);
+
+    // ── 1. SCAN LINES (subtle horizontal data streams) ──
+    scanLines.forEach(sl => {
+      sl.phase += sl.speed;
+      const py = sl.y * H + Math.sin(sl.phase * 3) * sl.amplitude * H;
+      const grad = ctx.createLinearGradient(0, 0, W, 0);
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(0.2, `rgba(0,229,255,${sl.alpha})`);
+      grad.addColorStop(0.5, `rgba(0,229,255,${sl.alpha * 1.6})`);
+      grad.addColorStop(0.8, `rgba(123,97,255,${sl.alpha})`);
+      grad.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.moveTo(0, py);
+      // Wavy line
+      for (let x = 0; x <= W; x += 4) {
+        const wave = Math.sin(x * 0.012 + sl.phase * 5) * sl.amplitude * H * 0.4;
+        ctx.lineTo(x, py + wave);
+      }
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    });
+
+    // ── 2. FLOATING BIO-TAG PARTICLES ──
+    const font = `bold {SIZE}px 'JetBrains Mono', monospace`;
+    particles.forEach(p => {
+      p.x += p.vx + scrollVelocity * 0.00002 * p.scrollOffset;
+      p.y += p.vy;
+      if (p.x < -0.1) p.x = 1.1;
+      if (p.x > 1.1)  p.x = -0.1;
+      if (p.y < -0.05) p.y = 1.05;
+      if (p.y > 1.05)  p.y = -0.05;
+
+      const px = p.x * W;
+      const py = p.y * H;
+
+      // Pulse alpha with scroll velocity
+      const pulseAlpha = p.alpha + scrollVelocity * 0.004;
+      const clampedAlpha = Math.min(pulseAlpha, 0.55);
+
+      ctx.font = font.replace('{SIZE}', p.size);
+      ctx.fillStyle = `rgba(0,229,255,${clampedAlpha})`;
+      ctx.fillText(p.label, px, py);
+
+      // Tiny dot
+      ctx.beginPath();
+      ctx.arc(px - 6, py - p.size * 0.35, 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(0,255,148,${clampedAlpha * 1.5})`;
+      ctx.fill();
+    });
+
+    // ── 3. RIGHT-SIDE ECG STRIP ──
+    const stripX = W - 180;
+    const stripW = 160;
+    const stripY = H * 0.5;
+    const stripH = 80;
+
+    // Background pill
+    ctx.fillStyle = 'rgba(13,16,23,0.55)';
+    ctx.beginPath();
+    ctx.roundRect(stripX - 8, stripY - stripH * 0.7, stripW + 16, stripH * 1.4, 12);
+    ctx.fill();
+    ctx.strokeStyle = `rgba(0,229,255,0.12)`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Label
+    ctx.font = "bold 8px 'JetBrains Mono'";
+    ctx.fillStyle = `rgba(0,229,255,0.5)`;
+    ctx.fillText('CARDIAC MONITOR', stripX, stripY - stripH * 0.55);
+
+    // BPM readout
+    ctx.font = "bold 22px 'Bebas Neue'";
+    const bpmColor = scrollVelocity > 4 ? '#ff6464' : scrollVelocity > 1.5 ? '#ffcc00' : '#00e5ff';
+    ctx.fillStyle = bpmColor;
+    ctx.fillText(Math.round(scrollBPM) + ' BPM', stripX, stripY - stripH * 0.2);
+
+    // Shift ECG history
+    const newSample = ecgY(ecgPhase % 1);
+    for (let i = ecgHistory.length - 1; i > 0; i--) ecgHistory[i] = ecgHistory[i-1];
+    ecgHistory[0] = newSample;
+
+    // Draw waveform
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < stripW && i < ecgHistory.length; i++) {
+      const ex = stripX + stripW - i;
+      const ey = stripY + ecgHistory[i] * stripH * 0.45;
+      if (!started) { ctx.moveTo(ex, ey); started = true; }
+      else ctx.lineTo(ex, ey);
+    }
+    const ecgGrad = ctx.createLinearGradient(stripX, 0, stripX + stripW, 0);
+    ecgGrad.addColorStop(0, 'transparent');
+    ecgGrad.addColorStop(0.3, bpmColor);
+    ecgGrad.addColorStop(1, bpmColor);
+    ctx.strokeStyle = ecgGrad;
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = bpmColor;
+    ctx.shadowBlur = 6;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Glowing dot at leading edge
+    ctx.beginPath();
+    ctx.arc(stripX + stripW, stripY + ecgHistory[0] * stripH * 0.45, 3, 0, Math.PI * 2);
+    ctx.fillStyle = bpmColor;
+    ctx.shadowColor = bpmColor;
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // ── 4. LEFT SIDE — SCROLL DEPTH SENSOR ──
+    const sensorX = 28;
+    const sensorH = H * 0.55;
+    const sensorY = H * 0.22;
+
+    // Track bar background
+    ctx.fillStyle = 'rgba(13,16,23,0.5)';
+    ctx.beginPath();
+    ctx.roundRect(sensorX - 6, sensorY - 4, 20, sensorH + 8, 10);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,229,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Fill level
+    const fillH = sensorH * scrollRatio;
+    const sensorGrad = ctx.createLinearGradient(0, sensorY + sensorH, 0, sensorY + sensorH - fillH);
+    sensorGrad.addColorStop(0, 'rgba(0,229,255,0.9)');
+    sensorGrad.addColorStop(0.5, 'rgba(123,97,255,0.7)');
+    sensorGrad.addColorStop(1, 'rgba(0,255,148,0.5)');
+    ctx.fillStyle = sensorGrad;
+    ctx.beginPath();
+    ctx.roundRect(sensorX - 2, sensorY + sensorH - fillH, 12, fillH, [0, 0, 6, 6]);
+    ctx.fill();
+
+    // Glow at tip
+    if (fillH > 4) {
+      ctx.beginPath();
+      ctx.arc(sensorX + 4, sensorY + sensorH - fillH, 5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,229,255,0.8)';
+      ctx.shadowColor = '#00e5ff';
+      ctx.shadowBlur = 12;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // Tick marks
+    for (let t = 0; t <= 4; t++) {
+      const ty = sensorY + (t / 4) * sensorH;
+      ctx.fillStyle = 'rgba(0,229,255,0.25)';
+      ctx.fillRect(sensorX + 12, ty - 0.5, 6, 1);
+    }
+
+    // Label
+    ctx.save();
+    ctx.translate(sensorX - 10, sensorY + sensorH * 0.5);
+    ctx.rotate(-Math.PI / 2);
+    ctx.font = "7px 'JetBrains Mono'";
+    ctx.fillStyle = 'rgba(0,229,255,0.35)';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCROLL DEPTH', 0, 0);
+    ctx.restore();
+
+    // Percentage
+    ctx.font = "bold 9px 'JetBrains Mono'";
+    ctx.fillStyle = 'rgba(0,229,255,0.6)';
+    ctx.textAlign = 'left';
+    ctx.fillText(Math.round(scrollRatio * 100) + '%', sensorX - 4, sensorY + sensorH + 18);
+
+    // ── 5. TOP BAR — SECTION LABEL ──
+    const section = getCurrentSection();
+    if (section) {
+      ctx.font = "bold 9px 'JetBrains Mono'";
+      ctx.fillStyle = 'rgba(0,229,255,0.4)';
+      ctx.textAlign = 'center';
+      ctx.fillText('▶ ' + section.toUpperCase() + ' ◀', W * 0.5, 88);
+      ctx.textAlign = 'left';
+    }
+
+    // ── 6. CORNER BRACKETS (HUD aesthetic) ──
+    drawBracket(ctx, 60, 76, 40, 'rgba(0,229,255,0.12)');
+    drawBracket(ctx, W - 60, 76, 40, 'rgba(0,229,255,0.12)', true);
+    drawBracket(ctx, 60, H - 76, 40, 'rgba(0,229,255,0.12)', false, true);
+    drawBracket(ctx, W - 60, H - 76, 40, 'rgba(0,229,255,0.12)', true, true);
+  }
+
+  function drawBracket(ctx, x, y, size, color, flipX=false, flipY=false) {
+    const sx = flipX ? -1 : 1;
+    const sy = flipY ? -1 : 1;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x + sx * size, y);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x, y + sy * size);
+    ctx.stroke();
+  }
+
+  function getCurrentSection() {
+    const labels = {
+      'hero': 'CAPA',
+      'intro': 'INTRODUÇÃO',
+      'desenvolvimento': 'DESENVOLVIMENTO',
+      'etica': 'ÉTICA',
+      'conclusao': 'CONCLUSÃO',
+      'bibliografia': 'BIBLIOGRAFIA'
+    };
+    let current = 'hero';
+    document.querySelectorAll('section[id]').forEach(s => {
+      if (window.scrollY >= s.offsetTop - 200) current = s.id;
+    });
+    return labels[current] || current;
+  }
+
+  requestAnimationFrame(draw);
+
+  // ── COUNTER ANIMATION ──
+  function animateCount(el, target, suffix='') {
+    let start = 0;
+    const duration = 1500;
+    const step = timestamp => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(eased * target) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  const statObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const nums = e.target.querySelectorAll('.s-num');
+        nums.forEach(n => {
+          const txt = n.textContent;
+          const match = txt.match(/[\d.]+/);
+          if (match) {
+            const num = parseFloat(match[0]);
+            const prefix = txt.replace(/[\d.]+.*/, '');
+            const suffix = txt.replace(/.*[\d.]/, '');
+            animateCount(n, num, suffix);
+          }
+        });
+        statObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.dev-stats').forEach(el => statObs.observe(el));
+
+  // ══════════════════════════════════════════════
+  // SISTEMA CHALETÔ — MOTOR DE ANIMAÇÕES JS
+  // cubic-bezier(0.23, 1, 0.32, 1) em tudo
+  // ══════════════════════════════════════════════
+
+  // ── 1. LOADER ──
+  const loader = document.getElementById('page-loader');
+  function dismissLoader() {
+    setTimeout(() => {
+      loader.classList.add('loader-exit');
+      setTimeout(() => { if (loader.parentNode) loader.remove(); }, 750);
+    }, 1600);
+  }
+  if (document.readyState === 'complete') { dismissLoader(); }
+  else { window.addEventListener('load', dismissLoader); }
+
+  // ── 2. INTERSECTION OBSERVER FACTORY ──
+  function makeObs(callback, options = {}) {
+    return new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) callback(entry.target);
+      });
+    }, { threshold: 0.12, ...options });
+  }
+
+  // ── 3. FADE-IN — slides in from below with Ease Out Quint ──
+  const fadeObs = makeObs(el => {
+    el.classList.add('fade-in--visible');
+    fadeObs.unobserve(el);
+  });
+  document.querySelectorAll('[data-fade-in]').forEach(el => {
+    // Support custom X offset for section labels (left-slide)
+    if (el.classList.contains('section-label')) {
+      el.style.setProperty('--fi-x', '-18px');
+    }
+    fadeObs.observe(el);
+  });
+
+  // ── 4. SPLIT-TEXT — cada linha sobe do seu overflow ──
+  const splitObs = makeObs(el => {
+    el.classList.add('split--visible');
+    splitObs.unobserve(el);
+  }, { threshold: 0.08 });
+  document.querySelectorAll('[data-split-text]').forEach(el => splitObs.observe(el));
+
+  // ── 5. MASK-REVEAL — cortina que sobe com zoom out ──
+  const maskObs = makeObs(el => {
+    el.classList.add('mask--visible');
+    maskObs.unobserve(el);
+  }, { threshold: 0.06 });
+  document.querySelectorAll('[data-mask-reveal]').forEach(el => maskObs.observe(el));
+
+  // ── 6. LINE-DRAW — linhas que se desenham da esquerda ──
+  const lineObs = makeObs(el => {
+    el.classList.add('line--visible');
+    lineObs.unobserve(el);
+  }, { threshold: 0.3 });
+  document.querySelectorAll('[data-line-draw]').forEach(el => lineObs.observe(el));
+
+  // ── 7. STAGGER — filhos que entram em cascata ──
+  const staggerObs = makeObs(el => {
+    el.classList.add('stagger--visible');
+    staggerObs.unobserve(el);
+  }, { threshold: 0.05 });
+  document.querySelectorAll('[data-stagger]').forEach(el => staggerObs.observe(el));
+
+  // ── 8. LEGACY .reveal — mantém compatibilidade com Chaletô easing ──
+  const legacyRevealObs = makeObs(el => {
+    el.classList.add('visible');
+    legacyRevealObs.unobserve(el);
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => legacyRevealObs.observe(el));
+
+  // ── 9. DIVIDERS — linha que se desenha ao atravessar ──
+  document.querySelectorAll('.divider').forEach(d => {
+    d.setAttribute('data-line-draw', '');
+    lineObs.observe(d);
+  });
+
+  // ── 10. CARD HOVER — brilho do bordo ao passar o rato ──
+  // Intro cards, ethics cards, bib items, principles
+  document.querySelectorAll('.intro-card, .ethics-card, .bib-item, .principle, .content-block').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      card.style.transition = 'border-color 0.35s cubic-bezier(0.23,1,0.32,1), transform 0.35s cubic-bezier(0.23,1,0.32,1), box-shadow 0.35s cubic-bezier(0.23,1,0.32,1)';
+      card.style.boxShadow = '0 0 0 1px rgba(0,229,255,0.18), 0 8px 32px rgba(0,229,255,0.06)';
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.boxShadow = '';
+    });
+  });
+
+  // ── 11. HERO META — line-draw nas bordas esquerdas ──
+  document.querySelectorAll('.hero-meta-item').forEach((item, i) => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(12px)';
+    item.style.transition = `opacity 0.7s cubic-bezier(0.23,1,0.32,1) ${1.8 + i * 0.12}s, transform 0.7s cubic-bezier(0.23,1,0.32,1) ${1.8 + i * 0.12}s`;
+    setTimeout(() => {
+      item.style.opacity = '1';
+      item.style.transform = 'translateY(0)';
+    }, 50);
+  });
+
+  // ── 12. SECTION TITLE — número de secção faz typewriter ──
+  document.querySelectorAll('.section-label').forEach(label => {
+    const originalText = label.textContent;
+    label.setAttribute('data-text', originalText);
+  });
+</script>
+</body>
+</html>
